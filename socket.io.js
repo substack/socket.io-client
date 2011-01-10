@@ -1789,8 +1789,10 @@ ASProxy.prototype =
   if (window.WebSocket) return;
 
   var console = window.console;
-  if (!console) console = {log: function(){ }, error: function(){ }};
-
+  if (!console || !console.log || !console.error) {
+    console = {log: function(){ }, error: function(){ }};
+  }
+  
   if (!swfobject.hasFlashPlayerVersion("9.0.0")) {
     console.error("Flash Player is not installed.");
     return;
@@ -1813,7 +1815,7 @@ ASProxy.prototype =
         self.__createFlash(url, protocol, proxyHost, proxyPort, headers);
       });
     }, 1);
-  }
+  };
   
   WebSocket.prototype.__createFlash = function(url, protocol, proxyHost, proxyPort, headers) {
     var self = this;
@@ -1990,10 +1992,10 @@ ASProxy.prototype =
       try {
         if (this.onmessage) {
           var e;
-          if (window.MessageEvent) {
+          if (window.MessageEvent && !window.opera) {
             e = document.createEvent("MessageEvent");
             e.initMessageEvent("message", false, false, data, null, null, window, null);
-          } else { // IE
+          } else { // IE and Opera, the latter one truncates the data parameter after any 0x00 bytes
             e = {data: data};
           }
           this.onmessage(e);
@@ -2018,7 +2020,7 @@ ASProxy.prototype =
       }
       object.dispatchEvent(event, arguments);
     };
-  }
+  };
 
   /**
    * Basic implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface">DOM 2 EventInterface</a>}
